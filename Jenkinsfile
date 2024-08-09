@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_USERNAME = 'logeshlogan'
-        DOCKER_HUB_PASSWORD = 'dckr_pat_FkFmZwfQ2QTqLd0uxRKZNHjY_R4'
-        REPO = 'logeshlogan/demo-vishal'
-        GIT_REPO = 'https://github.com/Logesh-Devops/demo.git'
+        DOCKER_HUB_USERNAME = 'vishalparmar94@gmail.com'
+        DOCKER_HUB_PASSWORD = 'Vishal@123'
+        REPO = 'vishalp123/demo-python'
+        GIT_REPO = 'https://github.com/vishalparmar1984/PythonDockerhub.git'
     }
 
     stages {
