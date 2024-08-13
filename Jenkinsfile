@@ -14,19 +14,20 @@ pipeline {
                 git url: "${GIT_REPO}"
             }
         }
-        stage('Get Timestamp') {
+        stage('Get Commit ID') {
             steps {
                 script {
-                    timestamp = new Date().format("yyyyMMddHHmmss")
-                    echo "Build Timestamp: ${timestamp}"
+                    // Get the short commit ID (last 6 characters)
+                    commitId = sh(script: "git rev-parse --short=6 HEAD", returnStdout: true).trim()
+                    echo "Git Commit ID: ${commitId}"
                 }
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Use a valid image name format with a timestamp
-                    imageName = "${REPO}:${timestamp}"
+                    // Use the commit ID as the image tag
+                    imageName = "${REPO}:${commitId}"
                     dockerImage = docker.build(imageName)
                 }
             }
@@ -34,9 +35,9 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    bat "echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin https://index.docker.io/v1/"
+                    sh "echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin https://index.docker.io/v1/"
                     dockerImage.push()
-                    bat "docker logout"
+                    sh "docker logout"
                 }
             }
         }
@@ -44,6 +45,14 @@ pipeline {
     post {
         always {
             cleanWs()
+        }
+        success {
+            script {
+                // Trigger the deployment job and pass the image tag as a parameter
+                build job: 'demo2', parameters: [
+                    string(name: 'DOCKER_IMAGE_TAG', value: "${commitId}")
+                ]
+            }
         }
     }
 }
